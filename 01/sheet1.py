@@ -40,21 +40,14 @@ class PCA():
 def gammaidx(X, k):
     # ...
     n = len(X)
-    d = len(X[0])
-    z = np.empty((k,d))
-    y = np.empty(n)
     
-    """
     X2 = (X**2).sum(1) + np.zeros([n,1])
     D = X2 - 2*(X.dot(X.T)) + X2.T
-    num = np.argsort(D,axis=1)
-    """
-    for i in range(n):
-        D = np.linalg.norm(X-X[i], axis =1)
-        num = np.argsort(D)
-        tmp = X[num]
-        z= tmp[1:k+1]
-        y[i] = sum(np.linalg.norm(z - X[i], axis =1))/k
+    tmp = np.sort(D,axis=1)
+    ktmp = tmp[:,1:1+k]
+    ktmp = np.sqrt(ktmp)
+    y = np.mean(ktmp,axis=1)
+    
 
     return y
 
@@ -137,7 +130,9 @@ def lle(X, m, tol, n_rule='knn', k=5, epsilon=1.):
             mins = np.argsort(D[i])[1:len(D[i])]
             srtd = D[i][mins]
             X = data[mins]
-            dd = len(srtd[np.where(srtd<epsilon**2)])
+            dd = np.sum(srtd<epsilon**2)
+            #dd = len(srtd[np.where(srtd<epsilon**2)])
+            
             if(dd==0):
                 raise ValueError("One of X has no neighbars")
             X = X[0:dd]
