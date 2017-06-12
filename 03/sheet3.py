@@ -11,10 +11,43 @@ from scipy.cluster.hierarchy import linkage, dendrogram
 import itertools
 #%matplotlib inline
 
+def zero_one_loss(y_true, y_pred):
+    assert(len(y_true) == len(y_pred))
+    D = np.abs(y_true - y_pred)
+    loss = len(np.where[D>0.1])/len(y_true)
+
+
+def cv(X, y, method, parameters,nfolds=10, nrepetitions=5,loss_function=zero_one_loss):
+    n=len(X)
+    d = len(X[0])
+    e = n % nfolds
+    div = n-e
+    nom = int(div/nfolds)
+    knl = parameters['kernel']
+    reg = parameters['regularization']
+    kp = parameters['kernelparameter']
+    losssum =np.zeros(len(reg)*len(kp))
+    krrset = [method(knl,kp[i],reg[j]) for i in range(len(kp)) for j in range(len(reg))]
+    for i in range(nrepetitions):
+        partidx=np.append((np.ones((nfolds,nom))*np.arange(nom)).reshape(div),np.arange(e))
+        np.random.shuffle(partidx)
+        for j in range(nfolds):
+            [krrset[a].fit(X[np.where(partidx!=j)],y[np.where(partidx!=j)]) for a in range(len(krrset))]
+            yy = [krrset[a].predict(X[np.where(partidx!=j)]) for a in range(len(krrset))]
+            loss = [loss_function(y[np.where(partidx!=j)].reshape(len(y[np.where(partidx!=j)]),1), np.array(yy[a])) for a in range(len(yy)) ]
+            losssum = losssum +np.array(loss)
+    D = (losssum -losssum.mean())**2
+    return krrset[np.argmin(D)]
+
+
+
+
 class krr(): 
     
     def __init__(self, kernel, kernelparameter, regularization):
         self.kernel = kernel
+        self.kernelparameter = kernelparameter
+        self.regularization = regularization
         self.kp = kernelparameter
         self.c = regularization
 
@@ -28,17 +61,17 @@ class krr():
         else: 
             X2 = Y
             n2 = len(X2)
-            
-        if(self.kernel =='gaussian'):
+ 
+        if((self.kernel =='gaussian') or (self.kernel ==['gaussian'])):
             w = self.kp
             X1 = (X**2).sum(1).reshape(n,1)*np.ones((n,n2))
             U1 = (X2**2).sum(1).reshape(1,n2) * np.ones([n,n2])
             D = X1 - 2*(X.dot(X2.T)) + U1
             K = np.exp(-D/(2*w**2))
-        elif(self.kernel =='polynomial'):
+        elif((self.kernel =='polynomial') or (self.kernel ==['polynomial'])):
             p= self.kp
             K = (np.dot(X,X2.T)+1)**p
-        elif(self.kernel =='linear'):
+        elif((self.kernel =='linear') or (self.kernel ==['linear'])):
             K = np.dot(X,X2.T)
         else:
             raise AssertionError("Choose from ['gaussian','polynomial','linear']")
@@ -51,7 +84,7 @@ class krr():
         self.K = K
         if(self.c==0):
             D, U =np.linalg.eigh(K)
-            c = np.random.uniform(0.01,0.10,100)
+            c = np.logspace(-2,2,10)
             err = np.empty(len(c))
             for i in range(len(c)):
                 LCI = np.diag(D)+c[i]*np.eye(n)
@@ -62,8 +95,7 @@ class krr():
                 err[i] = (((y-SY)/(1-np.diag(S)))**2).mean(0)
             cidx=np.argmin(err)
             self.c = c[cidx]
-        print(self.c)
-        
+            self.regularization =  c[cidx]
         KK = self.K + self.c *np.eye(n)
         inv = np.linalg.solve(KK,np.eye(n))
         self.alpha= np.dot(inv,y.reshape(n,1))
