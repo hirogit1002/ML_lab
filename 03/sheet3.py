@@ -13,9 +13,15 @@ import itertools
 
 def zero_one_loss(y_true, y_pred):
     assert(len(y_true) == len(y_pred))
-    D = np.abs(y_true - y_pred)
-    loss = len(np.where[D>0.1])/len(y_true)
-
+    pred = np.array(y_pred[:,0])
+    true = np.array(y_true[:,0])
+    true[np.where(true==-1)]=0
+    b = np.mean(pred)
+    pred[np.where(pred>=b)] = 1
+    pred[np.where(pred<b)] = 0
+    right = (true == pred).astype(np.int64).sum()
+    loss = (len(true)-right)/len(true)
+    return loss
 
 def cv(X, y, method, parameters,nfolds=10, nrepetitions=5,loss_function=zero_one_loss):
     n=len(X)
@@ -82,6 +88,27 @@ class krr():
         n= len(X)
         K = self.getkernel(X)
         self.K = K
+        
+
+        if(self.c==0):
+            D, U =np.linalg.eigh(K)
+            c = np.logspace(-4,4,100)
+            cc = c.reshape(len(c),1,1)
+            br = np.ones((len(c),1,1))
+            I = np.eye(len(K))*br
+            KK=br*K
+            KCI=KK +(I*cc)
+            KCI_inv=np.linalg.solve(KK+0.0000001*I,I)
+            S = np.dot(KCI_inv.transpose(0,2,1),K.T).transpose(0,2,1)
+            SY = np.dot(S,y.reshape(len(y),1))
+            diag=np.dot(I*S,np.ones((len(y),1)))-1
+            err = (((y.reshape(len(y),1)*br-SY)/diag)**2).mean(1)
+            cidx=np.argmin(err[:,0])
+            self.c = c[cidx]
+            self.regularization =  c[cidx]
+
+
+        """
         if(self.c==0):
             D, U =np.linalg.eigh(K)
             c = np.logspace(-2,2,10)
@@ -96,6 +123,9 @@ class krr():
             cidx=np.argmin(err)
             self.c = c[cidx]
             self.regularization =  c[cidx]
+        """
+
+
         KK = self.K + self.c *np.eye(n)
         inv = np.linalg.solve(KK,np.eye(n))
         self.alpha= np.dot(inv,y.reshape(n,1))
