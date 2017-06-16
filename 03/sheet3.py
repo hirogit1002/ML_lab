@@ -92,15 +92,18 @@ class krr():
 
         if(self.c==0):
             D, U =np.linalg.eigh(K)
-            c = np.logspace(-4,4,100)
+            c = np.logspace(-4,4,10)
             cc = c.reshape(len(c),1,1)
             br = np.ones((len(c),1,1))
             I = np.eye(len(K))*br
-            KK=br*K
-            KCI=KK +(I*cc)
-            KCI_inv=np.linalg.solve(KK+0.0000001*I,I)
-            S = np.dot(KCI_inv.transpose(0,2,1),K.T).transpose(0,2,1)
-            SY = np.dot(S,y.reshape(len(y),1))
+            UL =np.dot(U,np.diag(D))
+            UtY =np.dot(U.T,y.reshape(len(y),1))
+            L=br*np.diag(D)
+            LCI=L +(I*cc)
+            LCI_inv=1/LCI
+            ULCI = np.dot(LCI_inv.transpose(0,2,1),K.T).transpose(0,2,1)
+            S = np.dot(ULCI,U.T)
+            SY = np.dot(ULCI,UtY)
             diag=np.dot(I*S,np.ones((len(y),1)))-1
             err = (((y.reshape(len(y),1)*br-SY)/diag)**2).mean(1)
             cidx=np.argmin(err[:,0])
@@ -126,7 +129,7 @@ class krr():
         """
 
 
-        KK = self.K + self.c *np.eye(n)
+        KK = self.K + self.c *np.eye(n)+np.eye(n)*0.000000001
         inv = np.linalg.solve(KK,np.eye(n))
         self.alpha= np.dot(inv,y.reshape(n,1))
         

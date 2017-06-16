@@ -142,50 +142,188 @@ The analytical ROC curve is much smoother than all empirical ROC curves. And it 
 
 
 \section*{Assignment 4}
-\subsection*{Inv or Solve}
+\subsection*{Results}
 
 
-\begin{eqnarray*}
-X=
-\left(
-\begin{array}{cccc}
-2 & 4 & 6 \\
-8 & 10 & 12  
-\end{array}
-\right)
-, \:\:\:\:
-\mu = 
-\left(
-\begin{array}{cccc}
-4  \\
-10  
-\end{array}
-\right) 
-\end{eqnarray*}
-\begin{eqnarray*}
-C &=&
-\left(
-\begin{array}{cccc}
--2 & 0 & 2 \\
--2 & 0 & 2  
-\end{array}
-\right) 
-\left(
-\begin{array}{cccc}
--2 & -2\\
-0 & 0 \\
-2 & 2  
-\end{array}
-\right) 
-= 
-\left(
-\begin{array}{cccc}
-8 & 8\\
-8 & 8 \\  
-\end{array}
-\right) \\
-&\Rightarrow& \det(C) =0
-\end{eqnarray*}
+\begin{verbatim}
+{'banana': {'cvloss': 0.13734693877551021,
+  'kernel': 'gaussian',
+  'kernelparameter': 4.6415888336127775,
+  'regularization': 0.0001,
+  'ypred': array([[ 0.77109269],
+         [-0.2448248 ],
+         [-0.53843675],
+         ..., 
+         [ 1.04244162],
+         [-0.60053262],
+         [-0.16481672]])},
+ 'diabetis': {'cvloss': 0.24666666666666667,
+  'kernel': 'linear',
+  'kernelparameter': 0,
+  'regularization': 0.0001,
+  'ypred': array([[ 0.2926619 ],
+         [ 0.06084429],
+         [ 0.8399555 ],
+         ..., 
+         [-1.019224  ],
+         [-0.42906231],
+         [ 0.02838715]])},
+ 'flare-solar': {'cvloss': 0.3075,
+  'kernel': 'linear',
+  'kernelparameter': 0,
+  'regularization': 0.0001,
+  'ypred': array([[-0.24184525],
+         [-0.24184525],
+         [-0.26401811],
+         ..., 
+         [-0.28619095],
+         [-0.24184525],
+         [-0.24184525]])},
+ 'image': {'cvloss': 0.1792079207920792,
+  'kernel': 'linear',
+  'kernelparameter': 0,
+  'regularization': 0.0001,
+  'ypred': array([[ 0.68771487],
+         [-0.6650025 ],
+         [ 0.25757335],
+         ..., 
+         [-0.53029856],
+         [-0.05421134],
+         [ 0.06081382]])},
+ 'ringnorm': {'cvloss': 0.24357142857142858,
+  'kernel': 'linear',
+  'kernelparameter': 0,
+  'regularization': 0.0001,
+  'ypred': array([[-0.26620809],
+         [-0.55446703],
+         [-0.29458036],
+         ..., 
+         [-0.2445433 ],
+         [-0.14951235],
+         [-0.03140741]])}}
+\end{verbatim}
+
+
+
+\subsection*{ROC and AUC}
+
+To calicurate ROC, AUC and loss I defined a following function. This function returns only when plot = True. Therefore it works only as a loss function during the cross varidation but if we caricurate the loss of the test, we can plot a ROC curve and print AUC value.
+
+\begin{verbatim}
+def roc_fun(y_true, y_pred, plot = False):
+    assert(len(y_true) == len(y_pred))
+    bins=100
+    pred = np.array(y_pred[:,0])
+    true = np.array(y_true[:,0])
+    true[np.where(true==-1)]=0
+    n=len(pred)
+    thres = np.linspace(np.min(pred),np.max(pred),bins).reshape(bins,1)*np.ones((1 ,n))
+    predbr = pred.reshape(1,n)*np.ones((bins ,1))
+    prebl=(predbr>thres).astype(np.int64)
+    comp = (prebl==true).astype(np.int64)
+    tpr = (prebl*comp).sum(1)/true.sum()
+    fpr = (((comp-prebl))==(-np.ones(comp.shape))).sum(1)/(n-true.sum())
+    idx=np.argsort(fpr)
+    roc = np.append(fpr.reshape(1,len(fpr)),tpr.reshape(1,len(tpr)),0)
+    D = np.linalg.norm(roc - np.array([[0],[1]]),axis=0)
+    minidx=np.argmin(D)
+    loss=(n-comp[minidx].sum())/n
+    ROC = roc[:,idx]
+    
+    if(plot==True):
+        fpdif = ROC[0,1:]-ROC[0,:-1]
+        lower = fpdif*ROC[1,:-1]
+        upper = fpdif*ROC[1,1:]
+        AUC = (lower.sum()+upper.sum())/2
+        print("AUC = ",AUC)
+        plt.plot(ROC[0],ROC[1])
+        plt.title("ROC curve")
+        plt.xlabel("FP")
+        plt.ylabel("TP")
+    return loss 
+\end{verbatim}
+
+The plots of best results of ROC and AUC are following.
+
+\begin{verbatim}
+ROC curve of the classification of Banana 
+AUC = 0.927940824614
+\end{verbatim}
+
+\begin{figure}[htbp]
+ \centering 
+  \includegraphics[scale=0.7]{rocbg.png}\\
+    \caption{ROC curve of the Banana}
+\end{figure}
+
+\begin{verbatim}
+
+
+
+
+\end{verbatim}
+
+\begin{verbatim}
+ROC curve of the classification of diabetis 
+AUC =0.846986417657
+\end{verbatim}
+\begin{figure}[htbp]
+ \centering 
+  \includegraphics[scale=0.6]{rocdl.png}\\
+    \caption{ROC curve of the diabetis}
+\end{figure}
+
+\begin{verbatim}
+
+
+\end{verbatim}
+
+\begin{verbatim}
+ROC curve of the classification of flare-solar 
+AUC = 0.846986417657
+\end{verbatim}
+
+\begin{figure}[htbp]
+ \centering 
+  \includegraphics[scale=0.6]{rocdl.png}\\
+  \caption{ROC curve of the flare-solar}
+\end{figure}
+
+\begin{verbatim}
+
+
+
+\end{verbatim}
+
+\begin{verbatim}
+ROC curve of the classification of image 
+AUC = 0.846986417657
+\end{verbatim}
+
+\begin{figure}[htbp]
+ \centering 
+  \includegraphics[scale=0.6]{rocdl.png}\\
+    \caption{ROC curve of the of image }
+\end{figure}
+
+\begin{verbatim}
+
+
+
+\end{verbatim}
+
+
+\begin{verbatim}
+ROC curve of the classification of ringnorm
+AUC = 0.846986417657
+\end{verbatim}
+
+\begin{figure}[htbp]
+ \centering 
+  \includegraphics[scale=0.6]{rocdl.png}\\
+    \caption{ROC curve of the ringnorm }
+\end{figure}
+
 
 
 
