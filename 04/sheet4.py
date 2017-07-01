@@ -19,6 +19,7 @@ class svm_smo():
     def __init__(self, kernel,C):
         self.kernel = kernel
         self.c = C
+        self.min_alpha = 1e-5
 
     def getkernel(self, X, Y=None):
         n= len(X)
@@ -50,7 +51,7 @@ class svm_smo():
     def fx(self,X1,X2,Y):
         K=self.getkernel(X1,X2)
         alpY = (Y*self.alpha).reshape(len(self.alpha),1)
-        return np.dot(K,alpY)-self.b#np.sign(np.dot(K,alpY)+self.b)
+        return np.dot(K,alpY)+self.b#np.sign(np.dot(K,alpY)+self.b)
     
     def _compute_box_constraints(self, i, j, Y, alpha, C):
         
@@ -72,17 +73,11 @@ class svm_smo():
             return alpha, b, 0
         
         aph2_new= alpha[j]-Y[j]*(E_i-E_j)/kappa
-        
-        if((np.abs(aph2_new)<np.abs(H)) and (np.abs(aph2_new)>np.abs(L))):
-            if(aph2_new<L):
-                aph2_new=L
-            if(aph2_new>H):
-                aph2_new=H
-        else:
-            if(aph2_new>H):
-                aph2_new=H
-            if(aph2_new<L):
-                aph2_new=L
+
+        if(aph2_new>H):
+            aph2_new=H
+        elif(aph2_new<L):
+            aph2_new=L
            
         aph1_new = alpha[i]+Y[i]*Y[j]*(alpha[j]-aph2_new)
         if(np.abs(alpha[j]-aph2_new)<0.0005):
@@ -135,11 +130,14 @@ class svm_smo():
                 p=p+1
             else:
                 p=0
-        
-        f=self.fx(X,X,Y)*Y.reshape(len(Y),1)
-        self.SV= X[np.where(np.abs(f[:,0]-1)<0.0001)[0]]
-        self.y = Y[np.where(np.abs(f[:,0]-1)<0.0001)[0]]
-        self.alpha = self.alpha[np.where(np.abs(f[:,0]-1)<0.0001)[0]]
+
+        self.b=0.0
+        alp_idx = \
+            self.alpha > self.min_alpha
+        self.SV= X[alp_idx]
+        self.y = Y[alp_idx]
+        self.alpha = self.alpha[alp_idx]
+        self.b = np.mean(self.y - self.fx(self.SV,self.SV,self.y)[:,0])
         
     def predict(self, X):
         return np.sign(self.fx(X,self.SV,self.y)[:,0])
