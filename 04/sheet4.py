@@ -9,6 +9,8 @@ import scipy.sparse.linalg
 from scipy.misc import logsumexp
 from scipy.cluster.hierarchy import linkage, dendrogram
 import itertools as it
+from cvxopt.solvers import qp 
+from cvxopt import matrix
 import time
 #%matplotlib inline
 
@@ -71,10 +73,16 @@ class svm_smo():
         
         aph2_new= alpha[j]-Y[j]*(E_i-E_j)/kappa
         
-        if(aph2_new>H):
-            aph2_new=H
-        if(aph2_new<L):
-            aph2_new=L
+        if((np.abs(aph2_new)<np.abs(H)) and (np.abs(aph2_new)>np.abs(L))):
+            if(aph2_new<L):
+                aph2_new=L
+            if(aph2_new>H):
+                aph2_new=H
+        else:
+            if(aph2_new>H):
+                aph2_new=H
+            if(aph2_new<L):
+                aph2_new=L
            
         aph1_new = alpha[i]+Y[i]*Y[j]*(alpha[j]-aph2_new)
         if(np.abs(alpha[j]-aph2_new)<0.0005):
@@ -149,5 +157,78 @@ def plot_svm_2d(X, y, model):
     mesh_z = np.zeros((n, n))
     for y in range(n):
         for x in range(n):
-            mesh_z[y, x] = model.fx(np.array([a[x], b[y]]).reshape(1,2),C.SV,C.y)
+            mesh_z[y, x] = model.fx(np.array([a[x], b[y]]).reshape(1,2),model.SV,model.y)
     plt.contour(A, B, mesh_z, 0)
+    
+    
+    
+class svm_qp():
+    def __init__(self, kernel,C):
+        self.kernel = kernel
+        self.c = C
+        self.min_alpha = 1e-5
+    def getkernel(self, X, Y=None):
+        n= len(X)
+        n2 = n
+        if(Y==None):
+            X2=np.array(X)
+            x2=len(X2)
+            n2 = n
+        else: 
+            X2 = Y
+            n2 = len(X2)
+ 
+        if((self.kernel =='gaussian') or (self.kernel ==['gaussian'])):
+            w = self.kp
+            X1 = (X**2).sum(1).reshape(n,1)*np.ones((n,n2))
+            U1 = (X2**2).sum(1).reshape(1,n2) * np.ones([n,n2])
+            D = X1 - 2*(X.dot(X2.T)) + U1
+            K = np.exp(-D/(2*w**2))
+        elif((self.kernel =='polynomial') or (self.kernel ==['polynomial'])):
+            p= self.kp
+            K = (np.dot(X,X2.T)+1)**p
+        elif((self.kernel =='linear') or (self.kernel ==['linear'])):
+            K = np.dot(X,X2.T)
+        else:
+            raise AssertionError("Choose from ['gaussian','polynomial','linear']")
+        return K
+    
+    def fx(self,X1,X2,Y):
+        K=self.getkernel(X1,X2)
+        alpY = (Y*self.alpha).reshape(len(self.alpha),1)
+        return np.dot(K,alpY)+self.b#np.sign(np.dot(K,alpY)+self.b)
+    
+        
+    def fit(self, X, Y):
+        #self.X_fit = X
+        N= len(X)
+        K = self.getkernel(X)
+        P = matrix(np.outer(Y, Y) * K)
+        q = matrix(-1 * np.ones(N))
+
+        G_std = matrix(np.diag(np.ones(N) * -1))
+        h_std = matrix(np.zeros(N))
+
+        # a_i \leq c
+        G_slack = matrix(np.diag(np.ones(N)))
+        h_slack = matrix(np.ones(N) * self.c)
+
+        G = matrix(np.vstack((G_std, G_slack)))
+        h = matrix(np.vstack((h_std, h_slack)))
+
+        A = matrix(np.ones(N)*Y, (1, N))
+        b = matrix(0.0)
+
+        solution = qp(P, q, G, h, A, b)
+        self.alpha=np.ravel(solution['x'])
+
+        self.b=0.0
+        alp_idx = \
+            self.alpha > self.min_alpha
+        self.SV= X[alp_idx]
+        self.y = Y[alp_idx]
+        self.alpha = self.alpha[alp_idx]
+        self.b = np.mean(self.y - self.fx(self.SV,self.SV,self.y)[:,0])
+        
+    def predict(self, X):
+        return np.sign(self.fx(X,self.SV,self.y)[:,0])
