@@ -16,9 +16,10 @@ import time
 
 class svm_smo(): 
     
-    def __init__(self, kernel,C):
+    def __init__(self, kernel='gaussian',kernelparameter=1.,C=1.):
         self.kernel = kernel
         self.c = C
+        self.kp = kernelparameter
         self.min_alpha = 1e-5
 
     def getkernel(self, X, Y=None):
@@ -112,7 +113,7 @@ class svm_smo():
         K = self.getkernel(X)
         self.alpha = np.zeros(N)
         self.b = 0
-        P=1000
+        P=10
         tol = 0.03
         p=0
         
@@ -161,10 +162,12 @@ def plot_svm_2d(X, y, model):
     
     
 class svm_qp():
-    def __init__(self, kernel,C):
+    def __init__(self, kernel='gaussian',kernelparameter=1.,C=1.):
         self.kernel = kernel
         self.c = C
+        self.kp = kernelparameter
         self.min_alpha = 1e-5
+        
     def getkernel(self, X, Y=None):
         n= len(X)
         n2 = n
