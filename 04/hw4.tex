@@ -189,7 +189,44 @@ bias = np.linspace(-10,10,110)
 
 \section*{Assignment 5}
 
+\begin{verbatim}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{verbatim}
+
 \section*{Assignment 6}
+First to visualize the separation by a hyperplane the dimensions of datas are reduced by PCA.
+
+\begin{verbatim}
+pca= PCA(X)
+X_pro = pca.project(X,2)
+\end{verbatim}
+
+In case of linear separation class 1 and class 3 are well separated from other classes but class 2 are not. Because class 2 lies in the center of classes and it is not possible to separate by a linear line.
 
 \begin{figure}[htbp]
   \includegraphics[scale=0.3]{l1_23.png}
@@ -197,12 +234,27 @@ bias = np.linspace(-10,10,110)
   \includegraphics[scale=0.3]{l3_12.png}
 \end{figure}
 
+The losses for three linear separations are
+
+\begin{verbatim}
+Loss of linearly separation between class 1 and others:  0.0
+Loss of linearly separation between class 2 and others:  0.2814814814814815
+Loss of linearly separation between class 3 and others:  0.037037037037037035
+\end{verbatim}
+
+In case of non-linear separation(gaussian) all of three classes are separated well. Non-linear separation line can be a circle line therefore it is also usuful for classification of this dataset.
 
 \begin{figure}[htbp]
   \includegraphics[scale=0.3]{nl1_23.png}
   \includegraphics[scale=0.3]{nl2_13.png}
   \includegraphics[scale=0.3]{nl3_12.png}
 \end{figure}
+
+\begin{verbatim}
+Loss of non-linearly separation between class 1 and others:  0.0
+Loss of non-linearly separation between class 2 and others:  0.2814814814814815
+Loss of non-linearly separation between class 3 and others:  0.037037037037037035
+\end{verbatim}
 
 \section*{Assignment 7}
 
