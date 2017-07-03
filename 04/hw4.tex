@@ -173,6 +173,20 @@ When the sigma is higher and C is lower than optimal it tends to underfit, on th
 
 \subsection*{3. ROC curve with different bias}
 
+For optimal C and $\sigma$, a receiver operator characteristics (ROC) curve is plotted by varying the bias
+parameter b of your SVM model. 
+
+\begin{figure}[htbp]
+  \includegraphics[scale=0.5]{roc.png}
+\end{figure}
+
+The used possible bais are in this range:
+
+\begin{verbatim}
+bias = np.linspace(-10,10,110)
+\end{verbatim}
+
+
 \section*{Assignment 5}
 
 \section*{Assignment 6}
