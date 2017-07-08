@@ -1,14 +1,84 @@
-res2 = C._update_parameters(1.0, 0.5, 0, 1, np.array([[1.0, 0.3], [0.3, 1.0]]), np.array([-1, +1]), np.array([0.4, -0.5]), 1.2, 0.1)
-res3 = C._update_parameters(1.0, 2.0, 0, 1, np.array([[1.0, 0.3], [0.3, 1.0]]), np.array([-1, +1]), np.array([0.4, -0.5]), 1.2, 0.1)
+Best C for the digit  0  by the Linear Kernel C= 0.422222222222
+The Error rate:  0.00498256103637
+Best C for the digit  1  by the Linear Kernel C= 0.1
+The Error rate:  0.00348779272546
+Best C for the digit  2  by the Linear Kernel C= 0.1
+The Error rate:  0.0189337319382
+Best C for the digit  3  by the Linear Kernel C= 0.422222222222
+The Error rate:  0.00896860986547
+Best C for the digit  4  by the Linear Kernel C= 0.422222222222
+The Error rate:  0.00996512207275
+Best C for the digit  5  by the Linear Kernel C= 0.744444444444
+The Error rate:  0.00697558545092
+Best C for the digit  6  by the Linear Kernel C= 1.71111111111
+The Error rate:  0.0
+Best C for the digit  7  by the Linear Kernel C= 3.0
+The Error rate:  0.000498256103637
+Best C for the digit  8  by the Linear Kernel C= 2.67777777778
+The Error rate:  0.0104633781764
+Best C for the digit  9  by the Linear Kernel C= 0.422222222222
+The Error rate:  0.01096163428
 
-res2:
-(array([ 0.9,  0. ]), 1.95, 1)
 
-res3:
-(array([ 0.9,  0. ]), 2.7000000000000002, 1)
+Best C for the digit  0  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.178873941206
+Best C for the digit  1  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.00946686596911
+Best C for the digit  2  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.0986547085202
+Best C for the digit  3  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.0827105132038
+Best C for the digit  4  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.0996512207275
+Best C for the digit  5  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.079720976582
+Best C for the digit  6  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.0847035376183
+Best C for the digit  7  by the Polynomal Kernel C= 2.0
+And degree p=  10.0
+The Error rate:  0.0568011958146
+Best C for the digit  8  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.0827105132038
+Best C for the digit  9  by the Polynomal Kernel C= 1.0
+And degree p=  10.0
+The Error rate:  0.0881913303438
 
-#self.assertTrue((np.allclose(res2[0], [0.1, -0.8]) and
-#                 np.allclose(res2[1], 2.41, atol=1e-3) and
-#                 np.allclose(res3[0], [0.9, 0.0]) and
-#                 np.allclose(res3[1], 2.7, atol=1e-3)),
-#                msg='_update_parameters: Error found.')
+
+Best C for the digit  0  by the Gaussian Kernel C= 0.825
+And kernel width w=  1.31558702896
+The Error rate:  0.0
+Best C for the digit  1  by the Gaussian Kernel C= 1.55
+And kernel width w=  0.948683298051
+The Error rate:  0.000498256103637
+Best C for the digit  2  by the Gaussian Kernel C= 0.1
+And kernel width w=  0.707106781187
+The Error rate:  0.0986547085202
+Best C for the digit  3  by the Gaussian Kernel C= 0.1
+And kernel width w=  0.707106781187
+The Error rate:  0.0827105132038
+Best C for the digit  4  by the Gaussian Kernel C= 0.1
+And kernel width w=  0.707106781187
+The Error rate:  0.0996512207275
+Best C for the digit  5  by the Gaussian Kernel C= 0.1
+And kernel width w=  0.707106781187
+The Error rate:  0.079720976582
+Best C for the digit  6  by the Gaussian Kernel C= 0.825
+And kernel width w=  1.58113883008
+The Error rate:  0.0279023418037
+Best C for the digit  7  by the Gaussian Kernel C= 0.825
+And kernel width w=  1.58113883008
+The Error rate:  0.0189337319382
+Best C for the digit  8  by the Gaussian Kernel C= 0.1
+And kernel width w=  0.707106781187
+The Error rate:  0.0827105132038
+Best C for the digit  9  by the Gaussian Kernel C= 2.275
+And kernel width w=  1.31558702896
+The Error rate:  0.000498256103637
